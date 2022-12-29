@@ -1,4 +1,6 @@
-class UserController {
+const Controller = require("../../controllers");
+
+class UserController extends Controller {
   index(req, res, next) {
     try {
       res.status(200).json({
