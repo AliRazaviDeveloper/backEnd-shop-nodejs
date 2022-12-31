@@ -7,12 +7,11 @@ class CategoryController extends Controller {
   async createCategory(req, res, next) {
     try {
       await categorySchema.validateAsync(req.body);
-      const { title, label, parent, children } = req.body;
+      const { title, label, parent } = req.body;
       const category = await categoryModel.create({
         title,
         label,
         parent,
-        children,
       });
       if (!category)
         throw createHttpError.InternalServerError(
@@ -32,26 +31,30 @@ class CategoryController extends Controller {
 
   async getAllCategory(req, res, next) {
     try {
-      const result = await categoryModel.aggregate([
-        {
-          $graphLookup: {
-            from: "categories",
-            startWith: "$_id",
-            connectFromField: "_id",
-            connectToField: "children",
-            maxDepth: 10,
-            depthField: "depth",
-            as: "children",
-          },
-        },
-        {
-          $match: {
-            children: {
-              $ne: [],
-            },
-          },
-        },
-      ]);
+      // const result = await categoryModel.aggregate([
+      //   {
+      //     $graphLookup: {
+      //       from: "categories",
+      //       startWith: "$_id",
+      //       connectFromField: "_id",
+      //       connectToField: "children",
+      //       maxDepth: 10,
+      //       depthField: "depth",
+      //       as: "children",
+      //     },
+      //   },
+      //   {
+      //     $match: {
+      //       children: {
+      //         $ne: [],
+      //       },
+      //     },
+      //   },
+      // ]);
+
+      const result = await categoryModel.find({
+        parent: null,
+      });
 
       if (!result)
         throw createHttpError.InternalServerError(
@@ -92,7 +95,7 @@ class CategoryController extends Controller {
     try {
       const { id } = req.params;
       const result = await categoryModel.find(
-        { children: id },
+        { parent: id },
         { title: 1, label: 1, _id: 1 }
       );
       if (!result)
@@ -118,7 +121,7 @@ class CategoryController extends Controller {
       if (!category)
         throw createHttpError.NotFound("دسته بندی با این ایدی یافت نشد .");
       const deleteResult = await categoryModel.deleteMany({
-        $or: [{ _id: id }, { children: id }],
+        $or: [{ _id: id }, { parent: id }],
       });
       if (deleteResult.deletedCount === 0)
         throw createHttpError.InternalServerError(
@@ -139,22 +142,24 @@ class CategoryController extends Controller {
   async getCategoryWithId(req, res, next) {
     try {
       const { id } = req.params;
-      const category = await categoryModel.aggregate([
-        {
-          $match: { _id: mongoose.Types.ObjectId(id) },
-        },
-        {
-          $lookup: {
-            from: "category",
-            localField: "children",
-            foreignField: "_id",
-            as: "children",
-          },
-        },
-        {
-          $limit: 1,
-        },
-      ]);
+      // const category = await categoryModel.aggregate([
+      //   {
+      //     $match: { _id: mongoose.Types.ObjectId(id) },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "category",
+      //       localField: "children",
+      //       foreignField: "_id",
+      //       as: "children",
+      //     },
+      //   },
+      //   {
+      //     $limit: 1,
+      //   },
+      // ]);
+      const category = await categoryModel.findOne({ _id: id });
+
       if (!category)
         throw createHttpError.NotFound(
           "دسته بندی با ایدی مدنظر شما یافت نشد ."
@@ -170,6 +175,8 @@ class CategoryController extends Controller {
       next(error);
     }
   }
+
+  async update() {}
 }
 
 module.exports = new CategoryController();
