@@ -55,4 +55,27 @@ authRouter.post("/get-otp", authController.getOtp);
  *          description: Internal server error
  */
 authRouter.post("/check-otp", authController.checkOtp);
+
+/**
+ * @swagger
+ * tag: Authorization
+ * /api/v1/auth/refresh-token:
+ *  post:
+ *    summary: The authorization information refresh token process
+ *    tags: [Authorization]
+ *    parameters:
+ *    - name: tokenRefresh
+ *      description: refresh token
+ *      in: formData
+ *      required: true
+ *      type: string
+ *    responses:
+ *        201:
+ *          description: Success
+ *        401:
+ *          description: bad request error login process
+ *        500:
+ *          description: Internal server error
+ */
+authRouter.post("/refresh-token", authController.generateNewRefreshToken);
 module.exports = authRouter;
