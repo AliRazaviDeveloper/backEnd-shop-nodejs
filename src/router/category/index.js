@@ -17,6 +17,7 @@ categoryRouter.get(
   checkAccessToken,
   categoryController.getAllChildParentCategory
 );
+categoryRouter.patch("/:id", checkAccessToken, categoryController.update);
 categoryRouter.get(
   "/:id",
   checkAccessToken,

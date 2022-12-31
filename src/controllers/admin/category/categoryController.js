@@ -1,7 +1,10 @@
 const createHttpError = require("http-errors");
 const { default: mongoose } = require("mongoose");
 const { categoryModel } = require("../../../models/category");
-const categorySchema = require("../../../validation/category");
+const {
+  categorySchema,
+  categorySchemaUpdate,
+} = require("../../../validation/category");
 const Controller = require("../../controllers");
 class CategoryController extends Controller {
   async createCategory(req, res, next) {
@@ -176,7 +179,35 @@ class CategoryController extends Controller {
     }
   }
 
-  async update() {}
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { title, label } = req.body;
+      const result = await categoryModel.updateOne(
+        { _id: id },
+        {
+          $set: {
+            title,
+            label,
+          },
+        }
+      );
+      if (result.modifiedCount === 0)
+        throw createHttpError.InternalServerError(
+          "مشکلی در عملیات ابدیت به وجود آمده است . "
+        );
+
+      res.status(200).json({
+        status: 200,
+        data: {
+          message: "دسته بندی شما با موفقیت بروزرسانی شد . ",
+        },
+        error: null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new CategoryController();

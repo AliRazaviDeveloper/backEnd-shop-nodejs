@@ -17,4 +17,19 @@ const categorySchema = Joi.object({
     .error(new Error("ایدی دسته بندی صحیح نمی باشد .")),
 });
 
-module.exports = categorySchema;
+const categorySchemaUpdate = Joi.object({
+  title: Joi.string()
+    .required()
+    .min(2)
+    .max(30)
+    .error(new Error("عنوان دسته بندی صحیح نمی باشد .")),
+  label: Joi.string()
+    .required()
+    .min(2)
+    .max(30)
+    .error(new Error("برچسب دسته بندی صحیح نمی باشد .")),
+});
+module.exports = {
+  categorySchema,
+  categorySchemaUpdate,
+};
